@@ -6,7 +6,7 @@
 Gleich erst mal zu Beginn: 
 Schlagt es euch gleich erst mal aus dem Kopf, wenn ihr denkt, ihr haut das Skript auf einen Server im LAN und die Dateien auf das Kindle, fertig. So wird das nichts! Die beiden Skripts, vor allem aber `cron_kindle-wetter.py` (Server), welches für die Erstellung der PNG-Datei verantwortlich ist, ist extrem auf meine Bedürfnisse angepasst und muss von euch, an eure Geräte und Bedürfnisse, angepasst werden. 
 
-Ohne Basic-Kenntnisse im Skripting: FINGER WEG!
+Ohne Basic-Kenntnisse im Skripting: **FINGER WEG!**
 
 <img src="https://raw.githubusercontent.com/nicoh88/kindle-kt3_weatherdisplay_battery-optimized/master/README.jpg" style="border:1px solid lightgray" alt="Zwei Kindle KT3 als Wetterstation">
 
@@ -56,7 +56,7 @@ Auf einem Server im LAN, sucht sich das Skript `cron_kindle-wetter.py`, bei mir 
 
 Hat der Server alle Wetterdaten zusammen, lädt er sich die SVG-Datei `cron_kindle-wetter_preprocess.svg` und tauscht die für den Bereich definierten Variablen mit den echten und aktuellen Wetterdaten aus. Hier werden durch eine Logik sogar zwei Dateien `weatherdata-bad.png` und `weatherdata-wohnzimmer.png` erzeugt, welche dann im Webserver-Verzeichnis, des Servers, abgelegt werden.
 
-<img src="https://raw.githubusercontent.com/nicoh88/kindle-kt3_weatherdisplay_battery-optimized/master/Kindle/weatherdata-wohnzimmer.png" style="border:1px solid lightgray" width="300">&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/nicoh88/kindle-kt3_weatherdisplay_battery-optimized/master/Kindle/weatherdata-bad.png" style="border:1px solid lightgray" width="300">
+<img src="https://raw.githubusercontent.com/nicoh88/kindle-kt3_weatherdisplay_battery-optimized/master/Kindle/weatherdata-wohnzimmer.png" style="border:1px solid lightgray" width="300">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/nicoh88/kindle-kt3_weatherdisplay_battery-optimized/master/Kindle/weatherdata-bad.png" style="border:1px solid lightgray" width="300">
 
 Das Skript `weatherscript.sh` gehört auf das Kindle, bei mir `/mnt/us/scripts/`. Dieses Skript startet in der Regel 60 Sekunden nach dem Starten des Kindles und beendet dann erst mal alle Kindle üblichen Dienste, um Ressourcen / Akkukapazität zu sparen. Dann läuft das Skript in eine Schleife, die dauerhaft, immer und immer wieder, abgearbeitet wird. Pausiert wird das Skript durch ein STR (Suspend-to-RAM/ Suspend-to-Memory). Vor dem STR wird noch ein Wecker gestellt, der der Kindle-Hardware sagt, wann das Kindle wieder aufwachen soll. Dann, wenn der Wecker klingelt, läuft das Skript weiter, führt ein paar Befehle aus, holt sich das neue PNG mit den Wetterinformationen und verabschiedet sich für einen dynamischen Intervall wieder in den STR.
 
