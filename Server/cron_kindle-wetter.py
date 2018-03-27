@@ -201,8 +201,6 @@ for DEVICE in DEVICES:
                         for select in cursor.fetchall():
                             grr = '%.1f' % float(select[0])
 
-                        
-
                 ### Windrichtung
                 if datapointname.endswith('.WIND_DIR'):
                     datapointid = DATA['ise_id']
@@ -215,7 +213,7 @@ for DEVICE in DEVICES:
                     if DEVICE == 2541:
                         gwdtemp = '%.1f' % float(value)
 
-                        if 337.5 <= float(gwdtemp) <= 22.4:
+                        if 0 <= float(gwdtemp) <= 22.4:
                             gwd = "N"
                         elif 22.5 <= float(gwdtemp) <= 67.4:
                             gwd = "NO"
@@ -231,6 +229,8 @@ for DEVICE in DEVICES:
                             gwd = "W"
                         elif 292.5 <= float(gwdtemp) <= 337.4:
                             gwd = "NW"
+                        elif 337.5 <= float(gwdtemp) <= 360:
+                            gwd = "N"
 
                 ### Windgeschwindigkeit
                 if datapointname.endswith('.WIND_SPEED'):
