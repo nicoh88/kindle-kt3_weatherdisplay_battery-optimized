@@ -11,6 +11,7 @@
 ## mntroot rw
 ## cp /mnt/us/scripts/weather.conf /etc/upstart/
 
+
 ###########
 # Variables
 NAME=weatherscript
@@ -30,7 +31,7 @@ RIMG="${RSRV}/kindle-weather/weatherdata.png"
 RSH="${RSRV}/kindle-weather/${NAME}.sh"
 RPATH="/var/www/html/kindle-weather"
 
-ROUTERIP="192.168.1.1"                # Workaround, forget default gateway after STR
+ROUTERIP="192.168.1.1"                  # Workaround, forget default gateway after STR
 
 F5INTWORKDAY="\
 06,07,08,15,16,17,18,19|900
@@ -68,6 +69,11 @@ kill_kindle() {
   #initctl stop pmond       > /dev/null 2>&1      # not exist 5.9.4
 }
 
+customize_kindle() {
+  mkdir /mnt/us/update.bin.tmp.partial 			  # no auto update from kindle firmware
+  touch /mnt/us/WIFI_NO_NET_PROBE				  # no wlan test for internet
+}
+
 wait_wlan() {
   return `lipc-get-prop com.lab126.wifid cmState | grep CONNECTED | wc -l`
 }
@@ -84,6 +90,22 @@ send_sms () {
   done
 }
 
+map_ip_hostname () {
+	IP=`ifconfig ${NET} | grep "inet addr" | cut -d':' -f2 | awk '{print $1}'`
+	#HOSTNAME=`nslookup ${IP} | grep Address | grep ${IP} | awk '{print $4}' | awk -F. '{print $1}'`
+	if [ ${IP} == "192.168.1.70" ]; then
+	  HOSTNAME="kindle-kt3-schwarz"
+	elif [ ${IP} == "192.168.1.71" ]; then
+	  HOSTNAME="kindle-kt3-weiss"
+	else
+	  HOSTNAME="failed_map_ip_hostname"
+	  echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | Mappging der IP zum HOSTNAME fehlgeschlagen." >> ${LOG} 2>&1
+	  echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | DEBUG WLAN cmState > `lipc-get-prop com.lab126.wifid cmState`" >> ${LOG} 2>&1
+	  echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | DEBUG WLAN signalStrength > `lipc-get-prop com.lab126.wifid signalStrength`" >> ${LOG} 2>&1
+	  echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | DEBUG IP ifconfig > `ifconfig ${NET}`" >> ${LOG} 2>&1
+	fi
+}
+
 
 ##########
 ### Skript
@@ -92,14 +114,14 @@ send_sms () {
 NOTIFYBATTERY=0
 REFRESHCOUNTER=0
 
-IP=`ifconfig ${NET} | grep "inet addr" | cut -d':' -f2 | awk '{print $1}'`
-HOSTNAME=`nslookup ${IP} | grep Address | grep ${IP} | awk '{print $4}' | awk -F. '{print $1}'`
-if [ -z "${HOSTNAME}" ]; then
-  HOSTNAME="recently-reboot"
-fi
+### IP > HOSTNAME
+map_ip_hostname
 
 ### Kill Kindle processes
 kill_kindle
+
+### Customize Kindle
+customize_kindle
 
 ### Loop
 while true; do
@@ -169,6 +191,7 @@ while true; do
   echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | Aufwachzeitpunkt für den nächsten Ruhezustand `date -d @${WAKEUPTIMER} '+%Y-%m-%d_%H:%M:%S'`." >> ${LOG} 2>&1
 
   ### Enable WLAN
+  #lipc-set-prop com.lab126.cmd wirelessEnable 1 >> ${LOG} 2>&1
   lipc-set-prop com.lab126.wifid enable 1 >> ${LOG} 2>&1
   echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | WLAN aktivieren." >> ${LOG} 2>&1
 
@@ -178,6 +201,9 @@ while true; do
   while wait_wlan; do
     if [ ${WLANCOUNTER} -gt 30 ]; then
       echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | Leider kein bekanntes WLAN verfügbar." >> ${LOG} 2>&1
+      echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | DEBUG ifconfig > `ifconfig ${NET}`" >> ${LOG} 2>&1
+      echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | DEBUG cmState > `lipc-get-prop com.lab126.wifid cmState`" >> ${LOG} 2>&1
+      echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | DEBUG signalStrength > `lipc-get-prop com.lab126.wifid signalStrength`" >> ${LOG} 2>&1
       eips -f -g "${LIMGERRWLAN}"
       WLANNOTCONNECTED=1
       break
@@ -189,6 +215,9 @@ while true; do
 
   ### Connected with WLAN?
   if [ ${WLANNOTCONNECTED} -eq 0 ]; then
+
+    ### IP > HOSTNAME
+    map_ip_hostname
 
     ### Workaround Default Gateway after STR
     GATEWAY=`ip route | grep default | grep ${NET} | awk '{print $3}'`
@@ -267,7 +296,8 @@ while true; do
 
   ### Disable WLAN
   # No stable "wakealarm" with enabled WLAN
-  lipc-set-prop com.lab126.wifid enable 0
+  #lipc-set-prop com.lab126.cmd wirelessEnable 0 >> ${LOG} 2>&1
+  lipc-set-prop com.lab126.wifid enable 0 >> ${LOG} 2>&1
   echo "`date '+%Y-%m-%d_%H:%M:%S'` | ${HOSTNAME} | WLAN deaktivieren." >> ${LOG} 2>&1
 
   ### Set wakealarm
