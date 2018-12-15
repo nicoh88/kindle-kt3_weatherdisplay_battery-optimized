@@ -125,7 +125,7 @@ def sqlminmax(cursor, datapointid, sort, decimal):
 
 #####################
 # API-Abfrage
-# https://api.darksky.net/forecast/44d7d38433d8bb43f54895bdd65aa32d/50.192900,11.8035702?&units=ca&lang=de
+# https://api.darksky.net/forecast/aabbccddeeff11223344556677889900/50.192900,11.8035702?&units=ca&lang=de
 tries = 0
 max_tries = 5
 while tries < max_tries:
