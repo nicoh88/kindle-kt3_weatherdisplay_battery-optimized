@@ -427,7 +427,8 @@ for ROOM in ROOMS:
 		output = output.replace("$BBL", str(whl + ""))
 
 	codecs.open(SVG_OUTPUT, "w", encoding="utf-8").write(output)
-	_exec("rsvg-convert --background-color=white -o %s %s" % (TMP_OUTPUT, SVG_OUTPUT))
+	#_exec("rsvg-convert --background-color=white -o %s %s" % (TMP_OUTPUT, SVG_OUTPUT))
+	_exec("inkscape --without-gui --export-width 600 --export-height 800 --export-background=WHITE --export-png %s %s 1>/dev/null 2>&1" % (TMP_OUTPUT, SVG_OUTPUT))
 	_exec("pngcrush -c 0 -ow %s 1>/dev/null 2>&1" % TMP_OUTPUT)
 	_exec("mv -f '%s' '%s'" % (TMP_OUTPUT, OUTPUT))
 	_exec("rm -f '%s'" % SVG_OUTPUT)
